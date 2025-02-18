@@ -17,7 +17,7 @@ jobs:
       - name: "Run script for analytics"
         uses: barryhuang26/pull-request-analytics-action@v1
         with:
-          GITHUB_TOKEN: secrets.PR_ANALYTICS_TOKEN # 必須設定
+          GITHUB_TOKEN: ${{ secrets.PR_ANALYTICS_TOKEN }} # 必須設定
           GITHUB_REPO_FOR_ISSUE: "dd3-server" # 你的目標儲存庫名稱，例如 my-repo
           GITHUB_OWNER_FOR_ISSUE: "dudoo-team" # 目標儲存庫的擁有者，例如 my-org 或 my-username
           GITHUB_OWNERS_REPOS: "dudoo-team/dd3-server, dudoo-team/dd3-ios" # 列出擁有者和儲存庫，例如 my-org/my-repo1
