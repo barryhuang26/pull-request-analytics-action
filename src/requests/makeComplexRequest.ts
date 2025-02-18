@@ -10,6 +10,10 @@ export const makeComplexRequest = async (
     skipComments: true,
   }
 ) => {
+  const excludedPatterns = [
+    /\/generated\.go$/,  // 精確匹配 "generated.go"
+    /\/models_gen\.go$/, // 精確匹配 "models_gen.go"
+  ];
   const pullRequests = await getPullRequests(amount, repository);
 
   const pullRequestNumbers = pullRequests
@@ -31,7 +35,8 @@ export const makeComplexRequest = async (
   const { PRs, PREvents, PRComments } = await getDataWithThrottle(
     pullRequestNumbers,
     repository,
-    options
+    options,
+    excludedPatterns
   );
 
   const events = PREvents.map((element) =>

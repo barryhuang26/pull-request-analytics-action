@@ -9,7 +9,8 @@ import { Options, Repository } from "./types";
 export const getDataWithThrottle = async (
   pullRequestNumbers: number[],
   repository: Repository,
-  options: Options
+  options: Options,
+  excludedPatterns: (RegExp)[] = []
 ) => {
   const PRs = [];
   const PREvents = [];
@@ -25,7 +26,8 @@ export const getDataWithThrottle = async (
     );
     const pullRequestDatas = await getPullRequestDatas(
       pullRequestNumbersChunks,
-      repository
+      repository,
+      excludedPatterns
     );
     console.log(
       `Batch request #${counter + 1} out of ${Math.ceil(

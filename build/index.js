@@ -2057,7 +2057,7 @@ const delay_1 = __nccwpck_require__(1847);
 const getIssueTimelineEvents_1 = __nccwpck_require__(39684);
 const getPullRequestComments_1 = __nccwpck_require__(92041);
 const getPullRequestData_1 = __nccwpck_require__(6382);
-const getDataWithThrottle = async (pullRequestNumbers, repository, options) => {
+const getDataWithThrottle = async (pullRequestNumbers, repository, options, excludedPatterns = []) => {
     const PRs = [];
     const PREvents = [];
     const PRComments = [];
@@ -2067,7 +2067,7 @@ const getDataWithThrottle = async (pullRequestNumbers, repository, options) => {
         const startIndex = counter * constants_1.concurrentLimit;
         const endIndex = (counter + 1) * constants_1.concurrentLimit;
         const pullRequestNumbersChunks = pullRequestNumbers.slice(startIndex, endIndex);
-        const pullRequestDatas = await (0, getPullRequestData_1.getPullRequestDatas)(pullRequestNumbersChunks, repository);
+        const pullRequestDatas = await (0, getPullRequestData_1.getPullRequestDatas)(pullRequestNumbersChunks, repository, excludedPatterns);
         console.log(`Batch request #${counter + 1} out of ${Math.ceil(pullRequestNumbers.length / constants_1.concurrentLimit)}(${repository.owner}/${repository.repo})`);
         const prs = await Promise.allSettled(pullRequestDatas);
         await (0, delay_1.delay)(5000);
@@ -2191,14 +2191,41 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPullRequestDatas = void 0;
 const octokit_1 = __nccwpck_require__(75455);
 const constants_1 = __nccwpck_require__(8827);
-const getPullRequestDatas = async (pullRequestNumbers, repository) => {
-    const { repo, owner } = repository;
-    return pullRequestNumbers.map((number) => octokit_1.octokit.rest.pulls.get({
-        owner,
-        repo,
-        pull_number: number,
-        headers: constants_1.commonHeaders,
+const getPullRequestDatas = async (pullRequestNumbers, repository, excludedPatterns = []) => {
+    const { owner, repo } = repository;
+    const enrichedPullRequests = await Promise.all(pullRequestNumbers.map(async (prNumber) => {
+        // 🔹 取得 PR 基本資料
+        const prData = await octokit_1.octokit.rest.pulls.get({
+            owner,
+            repo,
+            pull_number: prNumber,
+            headers: constants_1.commonHeaders,
+        });
+        // 🔹 取得 PR 變更的檔案
+        const prFiles = await octokit_1.octokit.rest.pulls.listFiles({
+            owner,
+            repo,
+            pull_number: prNumber,
+            headers: constants_1.commonHeaders,
+        });
+        let totalAdditions = 0;
+        let totalDeletions = 0;
+        prFiles.data.forEach((file) => {
+            const isExcluded = excludedPatterns.some((pattern) => pattern.test(file.filename));
+            if (!isExcluded) {
+                totalAdditions += file.additions;
+                totalDeletions += file.deletions;
+            }
+        });
+        // 🔹 覆寫 `additions` 和 `deletions`
+        prData.data = {
+            ...prData.data, // 保留 PR 其他欄位
+            additions: totalAdditions,
+            deletions: totalDeletions,
+        };
+        return prData;
     }));
+    return enrichedPullRequests;
 };
 exports.getPullRequestDatas = getPullRequestDatas;
 
@@ -2379,6 +2406,10 @@ const getPullRequests_1 = __nccwpck_require__(21341);
 const makeComplexRequest = async (amount = 100, repository, options = {
     skipComments: true,
 }) => {
+    const excludedPatterns = [
+        /\/generated\.go$/, // 精確匹配 "generated.go"
+        /\/models_gen\.go$/, // 精確匹配 "models_gen.go"
+    ];
     const pullRequests = await (0, getPullRequests_1.getPullRequests)(amount, repository);
     const pullRequestNumbers = pullRequests
         .filter((pr) => {
@@ -2393,7 +2424,7 @@ const makeComplexRequest = async (amount = 100, repository, options = {
         return isIncludeLabelsCorrect && isExcludeLabelsCorrect;
     })
         .map((item) => item.number);
-    const { PRs, PREvents, PRComments } = await (0, getDataWithThrottle_1.getDataWithThrottle)(pullRequestNumbers, repository, options);
+    const { PRs, PREvents, PRComments } = await (0, getDataWithThrottle_1.getDataWithThrottle)(pullRequestNumbers, repository, options, excludedPatterns);
     const events = PREvents.map((element) => element.status === "fulfilled" ? element.value.data : null);
     const pullRequestInfo = PRs.map((element) => element.status === "fulfilled" ? element.value.data : null);
     const comments = PRComments.map((element) => element.status === "fulfilled" ? element.value.data : null);
