@@ -268,13 +268,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getMultipleValuesInput = void 0;
 const core = __importStar(__nccwpck_require__(42186));
@@ -329,13 +339,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getValueAsIs = void 0;
 const core = __importStar(__nccwpck_require__(42186));
@@ -1723,13 +1743,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.createOutput = void 0;
 const core = __importStar(__nccwpck_require__(42186));
@@ -1877,13 +1907,23 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 }) : function(o, v) {
     o["default"] = v;
 });
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.octokit = void 0;
 const octokit_1 = __nccwpck_require__(57467);
@@ -3718,14 +3758,24 @@ const createTotalTable = (data, users, date) => {
                 .join("/")}`,
         ];
     });
-    const items = data.total?.[date]?.pullRequestsInfo
-        ?.slice()
-        ?.sort((a, b) => (b.sizePoints || 0) - (a.sizePoints || 0))
-        .slice(0, parseInt((0, utils_1.getValueAsIs)("TOP_LIST_AMOUNT")))
-        .map((item) => ({
-        text: `${item.title}(+${item.additions}/-${item.deletions})`,
-        link: item.link || "",
-    })) || [];
+    // 產生最大 PR 的表格數據
+    const largestPrRows = (data.total?.[date]?.pullRequestsInfo || [])
+        .slice()
+        .sort((a, b) => (b.sizePoints || 0) - (a.sizePoints || 0))
+        .slice(0, parseInt((0, utils_1.getValueAsIs)("TOP_LIST_AMOUNT"), 10))
+        .map((item) => [
+        item.title || "Untitled PR",
+        `(+${item.additions || 0}/-${item.deletions || 0})`
+    ]);
+    // const items =
+    //   data.total?.[date]?.pullRequestsInfo
+    //     ?.slice()
+    //     ?.sort((a, b) => (b.sizePoints || 0) - (a.sizePoints || 0))
+    //     .slice(0, parseInt(getValueAsIs("TOP_LIST_AMOUNT")))
+    //     .map((item) => ({
+    //       text: `${item.title}(+${item.additions}/-${item.deletions})`,
+    //       link: item.link || "",
+    //     })) || [];
     return [
         (0, common_1.createTable)({
             title: `Contribution stats ${date}`,
@@ -3744,7 +3794,26 @@ const createTotalTable = (data, users, date) => {
                 rows: tableRowsTotal,
             },
         }),
-        (0, common_1.createList)("The largest PRs", items),
+        // createList("The largest PRs", items),
+        (0, common_1.createTable)({
+            title: "The largest PRs",
+            description: "",
+            table: {
+                headers: [
+                    // "user",
+                    "Additions / Deletions",
+                    "PR size",
+                ],
+                rows: largestPrRows.length > 0 ? largestPrRows : [["No data", ""]],
+            },
+        }),
+        // createTable({
+        //   title: "The largest PRs",
+        //   table: {
+        //     headers: ["user", "Additions / Deletions", "PR size"],
+        //     rows: largestPrRows,
+        //   },
+        // }),
     ].join("\n");
 };
 exports.createTotalTable = createTotalTable;
