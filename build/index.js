@@ -2582,12 +2582,24 @@ const createMarkdown = (data, users, dates, title = "Pull Request report", refer
         return "";
     const issueDescription = `This report based on ${data.total?.total?.closed || 0} last updated PRs. To learn more about the project and its configuration, please visit [Pull request analytics action](https://github.com/AlexSim93/pull-request-analytics-action).
   ${(0, utils_1.createConfigParamsCode)()}`;
+    // 格式化 data & users 為 JSON 字串，方便檢查每筆數據
+    const formattedData = JSON.stringify(data, null, 2);
+    const formattedUsers = JSON.stringify(users, null, 2);
     return `
 ## ${title}
   ${dates.includes("total") ? issueDescription : ""}
   ${(0, utils_1.createReferences)(references)}
     ${content.join("\n")}
-  ` + 'data' + data + 'user' + users;
+   **Data Details:**
+  \`\`\`json
+  ${formattedData}
+  \`\`\`
+
+  **Users:**
+  \`\`\`json
+  ${formattedUsers}
+  \`\`\`
+  `;
 };
 exports.createMarkdown = createMarkdown;
 

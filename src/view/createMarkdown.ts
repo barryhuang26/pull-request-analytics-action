@@ -45,10 +45,23 @@ export const createMarkdown = (
   } last updated PRs. To learn more about the project and its configuration, please visit [Pull request analytics action](https://github.com/AlexSim93/pull-request-analytics-action).
   ${createConfigParamsCode()}`;
 
+  // 格式化 data & users 為 JSON 字串，方便檢查每筆數據
+  const formattedData = JSON.stringify(data, null, 2).slice(0, 10000) + "\n\n... (truncated)";
+  const formattedUsers = JSON.stringify(users, null, 2);
+ 
   return `
 ## ${title}
   ${dates.includes("total") ? issueDescription : ""}
   ${createReferences(references)}
     ${content.join("\n")}
-  `+'data'+data+'user'+users;
+   **Data Details:**
+  \`\`\`json
+  ${formattedData}
+  \`\`\`
+
+  **Users:**
+  \`\`\`json
+  ${formattedUsers}
+  \`\`\`
+  `;
 };
