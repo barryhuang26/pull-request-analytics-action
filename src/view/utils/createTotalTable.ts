@@ -47,7 +47,8 @@ export const createTotalTable = (
     .slice(0, parseInt(getValueAsIs("TOP_LIST_AMOUNT"), 10))
     .map((item) => [
       item.title || "Untitled PR",
-      `(+${item.additions || 0}/-${item.deletions || 0})`
+      `(+${item.additions || 0}/-${item.deletions || 0})`,
+      `${item.additions+item.deletions*0.2|| 0}`
     ]);
   
 
@@ -88,10 +89,11 @@ export const createTotalTable = (
       table: {
         headers: [
           // "user",
+          "Branch Name",
           "Additions / Deletions",
           "PR size",
         ],
-        rows: largestPrRows.length > 0 ? largestPrRows : [["No data", ""]],
+        rows: largestPrRows.length > 0 ? largestPrRows : [["No data", "",""]],
       },
     }),
     // createTable({

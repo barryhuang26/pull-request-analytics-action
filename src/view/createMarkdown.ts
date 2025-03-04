@@ -50,5 +50,5 @@ export const createMarkdown = (
   ${dates.includes("total") ? issueDescription : ""}
   ${createReferences(references)}
     ${content.join("\n")}
-  `;
+  `+'data'+data+'user'+users;
 };

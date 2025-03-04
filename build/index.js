@@ -2587,7 +2587,7 @@ const createMarkdown = (data, users, dates, title = "Pull Request report", refer
   ${dates.includes("total") ? issueDescription : ""}
   ${(0, utils_1.createReferences)(references)}
     ${content.join("\n")}
-  `;
+  ` + 'data' + data + 'user' + users;
 };
 exports.createMarkdown = createMarkdown;
 
@@ -3765,7 +3765,8 @@ const createTotalTable = (data, users, date) => {
         .slice(0, parseInt((0, utils_1.getValueAsIs)("TOP_LIST_AMOUNT"), 10))
         .map((item) => [
         item.title || "Untitled PR",
-        `(+${item.additions || 0}/-${item.deletions || 0})`
+        `(+${item.additions || 0}/-${item.deletions || 0})`,
+        `${item.additions + item.deletions * 0.2 || 0}`
     ]);
     // const items =
     //   data.total?.[date]?.pullRequestsInfo
@@ -3801,10 +3802,11 @@ const createTotalTable = (data, users, date) => {
             table: {
                 headers: [
                     // "user",
+                    "Branch Name",
                     "Additions / Deletions",
                     "PR size",
                 ],
-                rows: largestPrRows.length > 0 ? largestPrRows : [["No data", ""]],
+                rows: largestPrRows.length > 0 ? largestPrRows : [["No data", "", ""]],
             },
         }),
         // createTable({
