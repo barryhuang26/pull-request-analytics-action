@@ -2582,23 +2582,11 @@ const createMarkdown = (data, users, dates, title = "Pull Request report", refer
         return "";
     const issueDescription = `This report based on ${data.total?.total?.closed || 0} last updated PRs. To learn more about the project and its configuration, please visit [Pull request analytics action](https://github.com/AlexSim93/pull-request-analytics-action).
   ${(0, utils_1.createConfigParamsCode)()}`;
-    // 格式化 data & users 為 JSON 字串，方便檢查每筆數據
-    const formattedData = JSON.stringify(data, null, 2);
-    const formattedUsers = JSON.stringify(users, null, 2);
     return `
 ## ${title}
   ${dates.includes("total") ? issueDescription : ""}
   ${(0, utils_1.createReferences)(references)}
     ${content.join("\n")}
-   **Data Details:**
-  \`\`\`json
-  ${formattedData}
-  \`\`\`
-
-  **Users:**
-  \`\`\`json
-  ${formattedUsers}
-  \`\`\`
   `;
 };
 exports.createMarkdown = createMarkdown;
@@ -3776,6 +3764,8 @@ const createTotalTable = (data, users, date) => {
         .sort((a, b) => (b.sizePoints || 0) - (a.sizePoints || 0))
         .slice(0, parseInt((0, utils_1.getValueAsIs)("TOP_LIST_AMOUNT"), 10))
         .map((item) => [
+        `${item.sizePoints || 0}`,
+        `${item.number || 0}`,
         item.title || "Untitled PR",
         `(+${item.additions || 0}/-${item.deletions || 0})`,
         `${item.additions + item.deletions * 0.2 || 0}`
@@ -3814,11 +3804,13 @@ const createTotalTable = (data, users, date) => {
             table: {
                 headers: [
                     // "user",
+                    "sizePoints",
+                    "number",
                     "Branch Name",
                     "Additions / Deletions",
                     "PR size",
                 ],
-                rows: largestPrRows.length > 0 ? largestPrRows : [["No data", "", ""]],
+                rows: largestPrRows.length > 0 ? largestPrRows : [["", "", "No data", "", ""]],
             },
         }),
         // createTable({
