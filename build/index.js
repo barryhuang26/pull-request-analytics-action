@@ -834,16 +834,16 @@ exports.getPullRequestSize = void 0;
 const calcPRsize_1 = __nccwpck_require__(8722);
 const getPullRequestSize = (additions, deletions) => {
     const size = (0, calcPRsize_1.calcPRsize)(additions, deletions);
-    if (size <= 50) {
+    if (size <= 200) {
         return "xs";
     }
-    if (size <= 200) {
+    if (size <= 400) {
         return "s";
     }
-    if (size <= 400) {
+    if (size <= 700) {
         return "m";
     }
-    if (size <= 700) {
+    if (size <= 1400) {
         return "l";
     }
     return "xl";
