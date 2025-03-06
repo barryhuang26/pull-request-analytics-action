@@ -2409,6 +2409,7 @@ const makeComplexRequest = async (amount = 100, repository, options = {
     const excludedPatterns = [
         /\/generated\.go$/, // 精確匹配 "generated.go"
         /\/models_gen\.go$/, // 精確匹配 "models_gen.go"
+        /.*_settings\.json$/, // 匹配任意前綴 + "settings.json"
     ];
     const pullRequests = await (0, getPullRequests_1.getPullRequests)(amount, repository);
     const pullRequestNumbers = pullRequests
