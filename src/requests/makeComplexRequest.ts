@@ -11,10 +11,12 @@ export const makeComplexRequest = async (
   }
 ) => {
   const excludedPatterns = [
-    /\/generated\.go$/,       // 精確匹配 "generated.go"
-    /\/models_gen\.go$/,      // 精確匹配 "models_gen.go"
-    /.*_settings\.json$/,     // 匹配任意前綴 + "settings.json"
-    /\/dd3ServerGraphQL\/.*/, // 匹配 dd3ServerGraphQL
+    /generated\.go$/,
+    /models_gen\.go$/,
+    /.*_settings\.json$/,
+    /dd3ServerGraphQL\//,
+    /package\.json$/,
+    /pnpm-lock\.yaml$/,
   ];
   const pullRequests = await getPullRequests(amount, repository);
 
