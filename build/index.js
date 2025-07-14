@@ -2413,6 +2413,8 @@ const makeComplexRequest = async (amount = 100, repository, options = {
         /dd3ServerGraphQL\//,
         /package\.json$/,
         /pnpm-lock\.yaml$/,
+        /dd3DomainTestSeed\/Resources\//,
+        /dd3DomainModelTests\/Resources\//
     ];
     const pullRequests = await (0, getPullRequests_1.getPullRequests)(amount, repository);
     const pullRequestNumbers = pullRequests

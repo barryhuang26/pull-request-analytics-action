@@ -17,6 +17,8 @@ export const makeComplexRequest = async (
     /dd3ServerGraphQL\//,
     /package\.json$/,
     /pnpm-lock\.yaml$/,
+    /dd3DomainTestSeed\/Resources\//,
+    /dd3DomainModelTests\/Resources\//
   ];
   const pullRequests = await getPullRequests(amount, repository);
 
