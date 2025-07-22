@@ -2414,7 +2414,8 @@ const makeComplexRequest = async (amount = 100, repository, options = {
         /package\.json$/,
         /pnpm-lock\.yaml$/,
         /dd3DomainTestSeed\/Resources\//,
-        /dd3DomainModelTests\/Resources\//
+        /dd3DomainModelTests\/Resources\//,
+        /dudooPOS3\/[^\/]+\.xcstrings$/
     ];
     const pullRequests = await (0, getPullRequests_1.getPullRequests)(amount, repository);
     const pullRequestNumbers = pullRequests

@@ -18,7 +18,8 @@ export const makeComplexRequest = async (
     /package\.json$/,
     /pnpm-lock\.yaml$/,
     /dd3DomainTestSeed\/Resources\//,
-    /dd3DomainModelTests\/Resources\//
+    /dd3DomainModelTests\/Resources\//,
+    /dudooPOS3\/[^\/]+\.xcstrings$/
   ];
   const pullRequests = await getPullRequests(amount, repository);
 
