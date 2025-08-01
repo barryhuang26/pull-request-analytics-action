@@ -2417,7 +2417,8 @@ const makeComplexRequest = async (amount = 100, repository, options = {
         /dd3DomainModelTests\/Resources\//,
         /dudooPOS3\/[^\/]+\.xcstrings$/,
         /dudooPOS3.xcodeproj\//,
-        /dudooPOS3.xcworkspace\//
+        /dudooPOS3.xcworkspace\//,
+        /src\/locales\//
     ];
     const pullRequests = await (0, getPullRequests_1.getPullRequests)(amount, repository);
     const pullRequestNumbers = pullRequests

@@ -21,7 +21,8 @@ export const makeComplexRequest = async (
     /dd3DomainModelTests\/Resources\//,
     /dudooPOS3\/[^\/]+\.xcstrings$/,
     /dudooPOS3.xcodeproj\//,
-    /dudooPOS3.xcworkspace\//
+    /dudooPOS3.xcworkspace\//,
+    /src\/locales\//
   ];
   const pullRequests = await getPullRequests(amount, repository);
 
