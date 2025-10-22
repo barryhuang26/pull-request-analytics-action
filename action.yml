@@ -96,6 +96,9 @@ inputs:
   EXCLUDE_LABELS:
     description: "Excludes PRs with mentioned labels. Values should be separated by comma"
     required: false
+  EXCLUDE_DIFF_LINE_PATTERNS:
+    description: "Regex patterns for diff lines to exclude when calculating additions/deletions. Values should be separated by comma. Supports /pattern/flags syntax."
+    required: false
   TIMEZONE:
     description: "Timezone to use in action"
     required: false

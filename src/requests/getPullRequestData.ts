@@ -6,7 +6,8 @@ import { commonHeaders } from "./constants";
 export const getPullRequestDatas = async (
   pullRequestNumbers: number[],
   repository: Repository,
-  excludedPatterns: (RegExp)[] = []
+  excludedFilePatterns: RegExp[] = [],
+  excludedLinePatterns: RegExp[] = []
 ) => {
   const { owner, repo } = repository;
 
@@ -32,12 +33,16 @@ export const getPullRequestDatas = async (
       let totalDeletions = 0;
 
       prFiles.data.forEach((file) => {
-        const isExcluded = excludedPatterns.some((pattern) =>
+        const isExcluded = excludedFilePatterns.some((pattern) =>
           pattern.test(file.filename)
         );
         if (!isExcluded) {
-          totalAdditions += file.additions;
-          totalDeletions += file.deletions;
+          const { additions, deletions } = calculateStatsForFile(
+            file,
+            excludedLinePatterns
+          );
+          totalAdditions += additions;
+          totalDeletions += deletions;
         }
       });
 
@@ -53,4 +58,46 @@ export const getPullRequestDatas = async (
   );
 
   return enrichedPullRequests;
+};
+
+const calculateStatsForFile = (
+  file: {
+    additions: number;
+    deletions: number;
+    patch?: string;
+  },
+  excludedLinePatterns: RegExp[]
+) => {
+  if (!file.patch) {
+    return { additions: file.additions, deletions: file.deletions };
+  }
+
+  let additions = 0;
+  let deletions = 0;
+
+  const shouldIgnoreLine = (line: string) =>
+    excludedLinePatterns.some((pattern) => pattern.test(line));
+
+  file.patch.split("\n").forEach((line) => {
+    if (line.startsWith("+++ ") || line.startsWith("--- ")) {
+      return;
+    }
+
+    if (line.startsWith("+")) {
+      const content = line.slice(1);
+      if (!shouldIgnoreLine(content)) {
+        additions++;
+      }
+      return;
+    }
+
+    if (line.startsWith("-")) {
+      const content = line.slice(1);
+      if (!shouldIgnoreLine(content)) {
+        deletions++;
+      }
+    }
+  });
+
+  return { additions, deletions };
 };

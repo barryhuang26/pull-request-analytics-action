@@ -10,7 +10,8 @@ export const getDataWithThrottle = async (
   pullRequestNumbers: number[],
   repository: Repository,
   options: Options,
-  excludedPatterns: (RegExp)[] = []
+  excludedFilePatterns: RegExp[] = [],
+  excludedDiffLinePatterns: RegExp[] = []
 ) => {
   const PRs = [];
   const PREvents = [];
@@ -27,7 +28,8 @@ export const getDataWithThrottle = async (
     const pullRequestDatas = await getPullRequestDatas(
       pullRequestNumbersChunks,
       repository,
-      excludedPatterns
+      excludedFilePatterns,
+      excludedDiffLinePatterns
     );
     console.log(
       `Batch request #${counter + 1} out of ${Math.ceil(

@@ -69,6 +69,7 @@ const sendActionError = (error) => {
             SHOW_USERS: (0, utils_1.getMultipleValuesInput)("SHOW_USERS").length,
             INCLUDE_LABELS: (0, utils_1.getMultipleValuesInput)("INCLUDE_LABELS").length,
             EXCLUDE_LABELS: (0, utils_1.getMultipleValuesInput)("EXCLUDE_LABELS").length,
+            EXCLUDE_DIFF_LINE_PATTERNS: (0, utils_1.getMultipleValuesInput)("EXCLUDE_DIFF_LINE_PATTERNS").length,
             EXECUTION_OUTCOME: (0, utils_1.getMultipleValuesInput)("EXECUTION_OUTCOME"),
             WEEKENDS: (0, utils_1.getMultipleValuesInput)("WEEKENDS"),
             HOLIDAYS: (0, utils_1.getMultipleValuesInput)("HOLIDAYS").length,
@@ -126,6 +127,7 @@ const sendActionRun = () => {
             SHOW_USERS: (0, utils_1.getMultipleValuesInput)("SHOW_USERS").length,
             INCLUDE_LABELS: (0, utils_1.getMultipleValuesInput)("INCLUDE_LABELS").length,
             EXCLUDE_LABELS: (0, utils_1.getMultipleValuesInput)("EXCLUDE_LABELS").length,
+            EXCLUDE_DIFF_LINE_PATTERNS: (0, utils_1.getMultipleValuesInput)("EXCLUDE_DIFF_LINE_PATTERNS").length,
             EXECUTION_OUTCOME: (0, utils_1.getMultipleValuesInput)("EXECUTION_OUTCOME"),
             WEEKENDS: (0, utils_1.getMultipleValuesInput)("WEEKENDS"),
             HOLIDAYS: (0, utils_1.getMultipleValuesInput)("HOLIDAYS").length,
@@ -2057,7 +2059,7 @@ const delay_1 = __nccwpck_require__(1847);
 const getIssueTimelineEvents_1 = __nccwpck_require__(39684);
 const getPullRequestComments_1 = __nccwpck_require__(92041);
 const getPullRequestData_1 = __nccwpck_require__(6382);
-const getDataWithThrottle = async (pullRequestNumbers, repository, options, excludedPatterns = []) => {
+const getDataWithThrottle = async (pullRequestNumbers, repository, options, excludedFilePatterns = [], excludedDiffLinePatterns = []) => {
     const PRs = [];
     const PREvents = [];
     const PRComments = [];
@@ -2067,7 +2069,7 @@ const getDataWithThrottle = async (pullRequestNumbers, repository, options, excl
         const startIndex = counter * constants_1.concurrentLimit;
         const endIndex = (counter + 1) * constants_1.concurrentLimit;
         const pullRequestNumbersChunks = pullRequestNumbers.slice(startIndex, endIndex);
-        const pullRequestDatas = await (0, getPullRequestData_1.getPullRequestDatas)(pullRequestNumbersChunks, repository, excludedPatterns);
+        const pullRequestDatas = await (0, getPullRequestData_1.getPullRequestDatas)(pullRequestNumbersChunks, repository, excludedFilePatterns, excludedDiffLinePatterns);
         console.log(`Batch request #${counter + 1} out of ${Math.ceil(pullRequestNumbers.length / constants_1.concurrentLimit)}(${repository.owner}/${repository.repo})`);
         const prs = await Promise.allSettled(pullRequestDatas);
         await (0, delay_1.delay)(5000);
@@ -2191,7 +2193,7 @@ Object.defineProperty(exports, "__esModule", ({ value: true }));
 exports.getPullRequestDatas = void 0;
 const octokit_1 = __nccwpck_require__(75455);
 const constants_1 = __nccwpck_require__(8827);
-const getPullRequestDatas = async (pullRequestNumbers, repository, excludedPatterns = []) => {
+const getPullRequestDatas = async (pullRequestNumbers, repository, excludedFilePatterns = [], excludedLinePatterns = []) => {
     const { owner, repo } = repository;
     const enrichedPullRequests = await Promise.all(pullRequestNumbers.map(async (prNumber) => {
         // 🔹 取得 PR 基本資料
@@ -2211,10 +2213,11 @@ const getPullRequestDatas = async (pullRequestNumbers, repository, excludedPatte
         let totalAdditions = 0;
         let totalDeletions = 0;
         prFiles.data.forEach((file) => {
-            const isExcluded = excludedPatterns.some((pattern) => pattern.test(file.filename));
+            const isExcluded = excludedFilePatterns.some((pattern) => pattern.test(file.filename));
             if (!isExcluded) {
-                totalAdditions += file.additions;
-                totalDeletions += file.deletions;
+                const { additions, deletions } = calculateStatsForFile(file, excludedLinePatterns);
+                totalAdditions += additions;
+                totalDeletions += deletions;
             }
         });
         // 🔹 覆寫 `additions` 和 `deletions`
@@ -2228,6 +2231,33 @@ const getPullRequestDatas = async (pullRequestNumbers, repository, excludedPatte
     return enrichedPullRequests;
 };
 exports.getPullRequestDatas = getPullRequestDatas;
+const calculateStatsForFile = (file, excludedLinePatterns) => {
+    if (!file.patch) {
+        return { additions: file.additions, deletions: file.deletions };
+    }
+    let additions = 0;
+    let deletions = 0;
+    const shouldIgnoreLine = (line) => excludedLinePatterns.some((pattern) => pattern.test(line));
+    file.patch.split("\n").forEach((line) => {
+        if (line.startsWith("+++ ") || line.startsWith("--- ")) {
+            return;
+        }
+        if (line.startsWith("+")) {
+            const content = line.slice(1);
+            if (!shouldIgnoreLine(content)) {
+                additions++;
+            }
+            return;
+        }
+        if (line.startsWith("-")) {
+            const content = line.slice(1);
+            if (!shouldIgnoreLine(content)) {
+                deletions++;
+            }
+        }
+    });
+    return { additions, deletions };
+};
 
 
 /***/ }),
@@ -2406,7 +2436,7 @@ const getPullRequests_1 = __nccwpck_require__(21341);
 const makeComplexRequest = async (amount = 100, repository, options = {
     skipComments: true,
 }) => {
-    const excludedPatterns = [
+    const excludedFilePatterns = [
         /generated\.go$/,
         /models_gen\.go$/,
         /.*_settings\.json$/,
@@ -2420,11 +2450,31 @@ const makeComplexRequest = async (amount = 100, repository, options = {
         /dudooPOS3.xcworkspace\//,
         /src\/locales\//
     ];
+    const parseRegex = (pattern) => {
+        const trimmedPattern = pattern.trim();
+        if (!trimmedPattern) {
+            return null;
+        }
+        const literalMatch = /^\/(.+)\/([a-z]*)$/i.exec(trimmedPattern);
+        try {
+            if (literalMatch) {
+                return new RegExp(literalMatch[1], literalMatch[2]);
+            }
+            return new RegExp(trimmedPattern);
+        }
+        catch (error) {
+            console.warn(`Unable to parse regex from EXCLUDE_DIFF_LINE_PATTERNS value "${trimmedPattern}": ${error.message}`);
+            return null;
+        }
+    };
+    const excludedDiffLinePatterns = (0, utils_1.getMultipleValuesInput)("EXCLUDE_DIFF_LINE_PATTERNS")
+        .map(parseRegex)
+        .filter((pattern) => !!pattern);
     const pullRequests = await (0, getPullRequests_1.getPullRequests)(amount, repository);
+    const excludeLabels = (0, utils_1.getMultipleValuesInput)("EXCLUDE_LABELS");
+    const includeLabels = (0, utils_1.getMultipleValuesInput)("INCLUDE_LABELS");
     const pullRequestNumbers = pullRequests
         .filter((pr) => {
-        const excludeLabels = (0, utils_1.getMultipleValuesInput)("EXCLUDE_LABELS");
-        const includeLabels = (0, utils_1.getMultipleValuesInput)("INCLUDE_LABELS");
         const isIncludeLabelsCorrect = includeLabels.length > 0
             ? pr.labels.some((label) => includeLabels.includes(label.name))
             : true;
@@ -2434,7 +2484,7 @@ const makeComplexRequest = async (amount = 100, repository, options = {
         return isIncludeLabelsCorrect && isExcludeLabelsCorrect;
     })
         .map((item) => item.number);
-    const { PRs, PREvents, PRComments } = await (0, getDataWithThrottle_1.getDataWithThrottle)(pullRequestNumbers, repository, options, excludedPatterns);
+    const { PRs, PREvents, PRComments } = await (0, getDataWithThrottle_1.getDataWithThrottle)(pullRequestNumbers, repository, options, excludedFilePatterns, excludedDiffLinePatterns);
     const events = PREvents.map((element) => element.status === "fulfilled" ? element.value.data : null);
     const pullRequestInfo = PRs.map((element) => element.status === "fulfilled" ? element.value.data : null);
     const comments = PRComments.map((element) => element.status === "fulfilled" ? element.value.data : null);
@@ -2914,6 +2964,7 @@ ${[
         "USE_CHARTS",
         "INCLUDE_LABELS",
         "EXCLUDE_LABELS",
+        "EXCLUDE_DIFF_LINE_PATTERNS",
         "EXECUTION_OUTCOME",
         "ISSUE_NUMBER",
     ]

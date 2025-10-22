@@ -10,7 +10,7 @@ export const makeComplexRequest = async (
     skipComments: true,
   }
 ) => {
-  const excludedPatterns = [
+  const excludedFilePatterns = [
     /generated\.go$/,
     /models_gen\.go$/,
     /.*_settings\.json$/,
@@ -24,12 +24,39 @@ export const makeComplexRequest = async (
     /dudooPOS3.xcworkspace\//,
     /src\/locales\//
   ];
+
+  const parseRegex = (pattern: string) => {
+    const trimmedPattern = pattern.trim();
+    if (!trimmedPattern) {
+      return null;
+    }
+    const literalMatch = /^\/(.+)\/([a-z]*)$/i.exec(trimmedPattern);
+    try {
+      if (literalMatch) {
+        return new RegExp(literalMatch[1], literalMatch[2]);
+      }
+      return new RegExp(trimmedPattern);
+    } catch (error) {
+      console.warn(
+        `Unable to parse regex from EXCLUDE_DIFF_LINE_PATTERNS value "${trimmedPattern}": ${(error as Error).message}`
+      );
+      return null;
+    }
+  };
+
+  const excludedDiffLinePatterns = getMultipleValuesInput(
+    "EXCLUDE_DIFF_LINE_PATTERNS"
+  )
+    .map(parseRegex)
+    .filter((pattern): pattern is RegExp => !!pattern);
+
   const pullRequests = await getPullRequests(amount, repository);
+
+  const excludeLabels = getMultipleValuesInput("EXCLUDE_LABELS");
+  const includeLabels = getMultipleValuesInput("INCLUDE_LABELS");
 
   const pullRequestNumbers = pullRequests
     .filter((pr) => {
-      const excludeLabels = getMultipleValuesInput("EXCLUDE_LABELS");
-      const includeLabels = getMultipleValuesInput("INCLUDE_LABELS");
       const isIncludeLabelsCorrect =
         includeLabels.length > 0
           ? pr.labels.some((label) => includeLabels.includes(label.name))
@@ -46,7 +73,8 @@ export const makeComplexRequest = async (
     pullRequestNumbers,
     repository,
     options,
-    excludedPatterns
+    excludedFilePatterns,
+    excludedDiffLinePatterns
   );
 
   const events = PREvents.map((element) =>

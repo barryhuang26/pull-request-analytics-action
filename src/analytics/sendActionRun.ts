@@ -33,6 +33,9 @@ export const sendActionRun = () => {
       SHOW_USERS: getMultipleValuesInput("SHOW_USERS").length,
       INCLUDE_LABELS: getMultipleValuesInput("INCLUDE_LABELS").length,
       EXCLUDE_LABELS: getMultipleValuesInput("EXCLUDE_LABELS").length,
+      EXCLUDE_DIFF_LINE_PATTERNS: getMultipleValuesInput(
+        "EXCLUDE_DIFF_LINE_PATTERNS"
+      ).length,
       EXECUTION_OUTCOME: getMultipleValuesInput("EXECUTION_OUTCOME"),
       WEEKENDS: getMultipleValuesInput("WEEKENDS"),
       HOLIDAYS: getMultipleValuesInput("HOLIDAYS").length,
