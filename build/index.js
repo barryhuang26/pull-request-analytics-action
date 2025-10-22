@@ -2450,6 +2450,7 @@ const makeComplexRequest = async (amount = 100, repository, options = {
         /dudooPOS3.xcworkspace\//,
         /src\/locales\//
     ];
+    const defaultExcludedDiffLinePatterns = [/github\.com\/dudoo-team\//];
     const parseRegex = (pattern) => {
         const trimmedPattern = pattern.trim();
         if (!trimmedPattern) {
@@ -2467,9 +2468,12 @@ const makeComplexRequest = async (amount = 100, repository, options = {
             return null;
         }
     };
-    const excludedDiffLinePatterns = (0, utils_1.getMultipleValuesInput)("EXCLUDE_DIFF_LINE_PATTERNS")
-        .map(parseRegex)
-        .filter((pattern) => !!pattern);
+    const excludedDiffLinePatterns = [
+        ...defaultExcludedDiffLinePatterns,
+        ...(0, utils_1.getMultipleValuesInput)("EXCLUDE_DIFF_LINE_PATTERNS")
+            .map(parseRegex)
+            .filter((pattern) => !!pattern),
+    ];
     const pullRequests = await (0, getPullRequests_1.getPullRequests)(amount, repository);
     const excludeLabels = (0, utils_1.getMultipleValuesInput)("EXCLUDE_LABELS");
     const includeLabels = (0, utils_1.getMultipleValuesInput)("INCLUDE_LABELS");

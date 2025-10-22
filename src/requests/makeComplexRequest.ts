@@ -25,6 +25,8 @@ export const makeComplexRequest = async (
     /src\/locales\//
   ];
 
+  const defaultExcludedDiffLinePatterns = [/github\.com\/dudoo-team\//];
+
   const parseRegex = (pattern: string) => {
     const trimmedPattern = pattern.trim();
     if (!trimmedPattern) {
@@ -44,11 +46,12 @@ export const makeComplexRequest = async (
     }
   };
 
-  const excludedDiffLinePatterns = getMultipleValuesInput(
-    "EXCLUDE_DIFF_LINE_PATTERNS"
-  )
-    .map(parseRegex)
-    .filter((pattern): pattern is RegExp => !!pattern);
+  const excludedDiffLinePatterns = [
+    ...defaultExcludedDiffLinePatterns,
+    ...getMultipleValuesInput("EXCLUDE_DIFF_LINE_PATTERNS")
+      .map(parseRegex)
+      .filter((pattern): pattern is RegExp => !!pattern),
+  ];
 
   const pullRequests = await getPullRequests(amount, repository);
 
