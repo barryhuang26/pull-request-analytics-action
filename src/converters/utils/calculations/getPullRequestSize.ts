@@ -7,16 +7,16 @@ export const getPullRequestSize = (
   deletions: number | undefined
 ): PullRequestSize => {
   const size = calcPRsize(additions, deletions);
-  if (size <= 200) {
+  if (size <= 500) {
     return "xs";
   }
-  if (size <= 400) {
+  if (size <= 1000) {
     return "s";
   }
-  if (size <= 700) {
+  if (size <= 1500) {
     return "m";
   }
-  if (size <= 1400) {
+  if (size <= 3000) {
     return "l";
   }
   return "xl";
