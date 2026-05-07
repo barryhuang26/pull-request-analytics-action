@@ -132,5 +132,5 @@ outputs:
   MARKDOWN:
     description: "Markdown text with a report"
 runs:
-  using: "node20"
+  using: "node24"
   main: "build/index.js"
