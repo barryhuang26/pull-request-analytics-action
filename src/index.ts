@@ -30,6 +30,13 @@ async function main() {
         rateLimitAtBeginning.data.rate.remaining
       );
     } catch (error) {
+      if ((error as { status?: number }).status === 401) {
+        throw new Error(
+          "GitHub authentication failed while checking the API rate limit. " +
+            "Verify that GITHUB_TOKEN is set and valid. If you are reading organization " +
+            "teams or members, use a personal access token with repo and read:org scopes."
+        );
+      }
       console.log(
         "Rate limit could not be retrieved at the beginning of the action"
       );

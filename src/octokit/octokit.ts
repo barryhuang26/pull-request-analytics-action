@@ -6,10 +6,14 @@ import { getValueAsIs } from "../common/utils";
 Octokit.plugin(throttling);
 
 const defaultBaseUrl = "https://api.github.com";
+const authToken =
+  getValueAsIs("GITHUB_TOKEN") ||
+  getValueAsIs("github-token") ||
+  getValueAsIs("token");
 
 export const octokit = new Octokit({
   baseUrl: process.env["GITHUB_API_URL"] || defaultBaseUrl,
-  auth: getValueAsIs("GITHUB_TOKEN"),
+  auth: authToken,
   throttle: {
     onSecondaryRateLimit: (_, options) => {
       octokit.log.error(
